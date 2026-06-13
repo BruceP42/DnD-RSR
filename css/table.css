@@ -1,0 +1,69 @@
+/* table.css */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: var(--secondary-color);
+  color: var(--accent-color);
+}
+td.no-padding {
+  padding: 0;
+}
+th tr.center {
+      text-align: center;
+}
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  /* following 3 lines added to make magic-item table rows higher */
+  font-size: 1rem;
+  line-height: 1.4; /* Or 1.5 if preferred */
+  vertical-align: middle;
+}
+
+th {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+}
+
+tr {
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+tr:nth-child(even) {
+  background-color: var(--main-color);
+  color: var(--secondary-color);
+}
+
+tr:nth-child(odd) {
+  background-color: var(--secondary-color);
+  color: var(--main-color);
+}
+
+/* Styling to enable tables to be sorted by clicking on the table header */
+/* Make it look clickable */
+th.sortable {
+  cursor: pointer;                          /* Show hand cursor */
+  user-select: none;                        /* Disable text selection */
+  position: relative;
+}
+
+th.sortable:hover {                         /* change the background color of headers on hover, indicating they are clickable: */
+  background-color: #f0f0f0;
+}
+
+th.sortable::after {
+  content: " ⇅";                            /* Unsorted indicator */
+  font-size: 0.8em;
+  margin-left: 4px;
+  position: absolute;
+  right: 8px;
+  color: #999;
+}
+
+th.sortable.asc::after { content: " ↑"; }   /* Ascending */
+th.sortable.desc::after { content: " ↓"; }  /* Descending */
+th.sortable:hover::after { color: #333; }

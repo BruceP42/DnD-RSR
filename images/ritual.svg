@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="50" fill="#2b5dab"/>
+  <!-- Outer ring — 8 radiating lines -->
+  <line x1="50" y1="10" x2="50" y2="18"  stroke="#aac8ff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="82" x2="50" y2="90"  stroke="#aac8ff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="10" y1="50" x2="18" y2="50"  stroke="#aac8ff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="82" y1="50" x2="90" y2="50"  stroke="#aac8ff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="21" y1="21" x2="27" y2="27"  stroke="#aac8ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="79" y1="21" x2="73" y2="27"  stroke="#aac8ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="21" y1="79" x2="27" y2="73"  stroke="#aac8ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="79" y1="79" x2="73" y2="73"  stroke="#aac8ff" stroke-width="2" stroke-linecap="round"/>
+  <!-- Hexagram — two overlapping equilateral triangles -->
+  <!-- Triangle pointing up: apex (50,25), base corners (28.35,62.5) and (71.65,62.5) -->
+  <polygon points="50,25 71.65,62.5 28.35,62.5"
+           fill="none" stroke="#aac8ff" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Triangle pointing down: apex (50,75), base corners (28.35,37.5) and (71.65,37.5) -->
+  <polygon points="50,75 71.65,37.5 28.35,37.5"
+           fill="none" stroke="#aac8ff" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Inner hexagon — the overlap region of the two triangles -->
+  <polygon points="64.4,50 57.2,37.5 42.8,37.5 35.6,50 42.8,62.5 57.2,62.5"
+           fill="#4a82cc" opacity="0.55"/>
+  <!-- Centre dot -->
+  <circle cx="50" cy="50" r="4" fill="#ddeeff"/>
+</svg>

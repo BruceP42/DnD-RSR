@@ -1,0 +1,18 @@
+/* layout.css */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--background-color);
+  z-index: 1000; /* This must be HIGHER than anything else */
+}
+
+.main {
+  padding: 16px;
+  margin-top: 3px;
+  height: 1500px; /* Used in this example to enable scrolling */
+}
+.header-spacer {
+  height: 30px; /* again, same as header height */
+}

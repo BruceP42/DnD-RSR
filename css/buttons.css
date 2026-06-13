@@ -1,0 +1,142 @@
+/* buttons.css */
+/* Add classes CalcCR and CalcXP */
+/* === Shared fantasy button foundation === */
+.fancy-scroll-button,
+.edit-button,
+.scroll-button {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 1.2rem;
+  padding: 0.6em 1.2em;
+  border: 4px solid #5a3e1b; /* default dark brown border */
+  border-radius: 16px;
+  color: #3b2c15;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-shadow: 0px 1px 0px #fff;
+  text-decoration: none; /* remove link underlines */
+  background: url('../images/parchment-texture.jpg') center center / cover no-repeat;
+}
+
+/* Hover and active states (shared) */
+.fancy-scroll-button:hover,
+.edit-button:hover,
+.scroll-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.05);
+}
+
+.fancy-scroll-button:active,
+.edit-button:active,
+.scroll-button:active {
+  transform: translateY(0px);
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+  filter: brightness(0.95);
+}
+
+/* === Variants === */
+
+/* Fancy scroll button — lighter border and slightly larger */
+.fancy-scroll-button {
+  border-color: #a67c52; /* lighter golden-brown border */
+  color: #4b2e14;
+  text-shadow: 1px 1px 0 #fff8e1;
+  font-size: 20px;
+  padding: 12px 24px;
+}
+
+/* Edit button — uses same parchment background and border width, but darker border for contrast */
+.edit-button {
+  border-color: #5a3e1b; /* dark brown */
+  color: #3b2c15;
+  font-size: 1.1rem;
+  text-shadow: 0px 1px 0px #fff;
+}
+
+/* Scroll button — legacy version; identical to edit style for compatibility */
+.scroll-button {
+  border-color: #5a3e1b;
+  font-size: 1.2rem;
+}
+
+/* === Non-fantasy buttons === */
+
+.back-button {
+  display: block;
+  margin: 15px auto;
+  padding: 10px 15px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.back-button:hover {
+  background-color: #545b62;
+}
+
+/* Generic button fallback */
+button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+/* Buttons for naviating forward and reverse in dataset-detail view */
+.dataset-nav-button {
+    display: inline-block;
+    padding: 10px 18px;
+    margin: 0 6px;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 1.1rem;
+    background: var(--parchment-light);
+    border: 2px solid var(--parchment-dark);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dataset-nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Individual variants for future styling */
+.dataset-nav-prev {}
+.dataset-nav-next {}
+.dataset-nav-back {}
+
+.dataset-nav-bar {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* ============================================================
+   Align multiple buttons side-by-side within a table cell
+   ============================================================ */
+
+/* When a <td> contains more than one button or link (e.g., View + Edit),
+   make them display neatly side by side with spacing */
+td:has(.fancy-scroll-button + .edit-button),
+td:has(.edit-button + .fancy-scroll-button) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5em; /* spacing between buttons */
+}
+
+/* Prevent flex shrink/stretch and preserve button shape */
+td .fancy-scroll-button,
+td .edit-button {
+  flex: 0 0 auto;
+}

@@ -1,0 +1,46 @@
+/* ---------------------------------------------------------
+   Path:         css/base.css
+   File:         base.css
+   Version:      V1.1
+   System:       D&D Reference System
+   Module/Role:  Site-wide base styles — CSS custom properties,
+                 body/html reset, and font declaration.
+                 Loaded by layout-loader.js on every page.
+   Dependencies: none
+   Created:      (pre-Step 13)
+   Last Updated: 2026-05-23
+   Author:       Bruce Pilcher
+
+   Changelog:
+     V1.1: Step 13 — removed #data-warning-banner block.
+       That block is RSR-specific and has moved to
+       runtime/css/rsr.css.
+     V1.0: Initial version.
+--------------------------------------------------------- */
+
+:root {
+  --main-color: #888888; /* dark grey */
+  --secondary-color: #cccccc; /* Default grey */
+  --accent-color: #C0B4A3;   /* Soft Warm Grey: #C0B4A3 – a light, warm grey with a hint of brown. */
+  --text-color: #333333; /* Default dark text */
+  --background-color: #f3dbbf; /* This makes the background color parchment */
+  --highlight-red: #7A0000; /* Official 5e-style deep red */
+}
+
+body, html {
+  height: 100%;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0 10px 0 8px;
+  /*  Added trying to fix navbar not showing */
+  padding: 0;
+  z-index: auto; /* or remove if set */
+  position: static; /* or remove if set */
+}
+
+@font-face {
+  font-family: 'IM Fell English SC';
+  src: url('../fonts/IM FELL English SC.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}

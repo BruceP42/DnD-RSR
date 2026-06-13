@@ -1,0 +1,8 @@
+{
+  "controlledVocabularies": {
+    "school": {
+      "ordered": false,
+      "values": ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"]
+    }
+  }
+}

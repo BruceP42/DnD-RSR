@@ -1,0 +1,48 @@
+/* colour-themes.css */
+/* Section-based Themes */
+.main-color {
+  color: var(--main-color)
+}
+.secondary-color {
+  color: var(--secondary-color)
+}
+.accent-color {
+  color: var(--accent-color)
+}
+.text-color {
+  color: var(--text-color)
+}
+
+/* Colour Schemes */
+.adventure-design {
+  --main-color: #A67C52; /* A warm, earthy brown reminiscent of aged parchment or worn leather. It evokes a sense of exploration and adventure. */
+  --secondary-color: #DFC49D; /* A muted golden beige, similar to sunlit sand or old maps, reinforcing the theme of discovery */
+  --accent-color: #F3E9DC; /* A very light cream, resembling parchment paper or aged vellum, providing contrast and readability. */
+  --text-color: #5A3E22; /* A deep brown */
+}
+.character-design {
+  --main-color: #5B7C99; /* A desaturated deep blue, resembling stormy skies or well-worn noble garments, giving a refined and structured feel. */
+  --secondary-color: #A8C0D8; /* A soft steel blue, like the cool metal of a knight’s armour or ink on a character sheet. */
+  --accent-color: #E2EAF2; /* A pale icy blue, adding clarity and contrast while maintaining the cool, thoughtful theme. */
+  --text-color: #2C4966; /* A dark desaturated blue */
+}
+.general-reference {
+  --main-color: #4A4A4A; /* A dark, neutral grey, conveying seriousness and neutrality, ideal for referencing core rules and mechanics. */
+  --secondary-color: #9B9B9B; /* A mid-tone grey, providing a balance between structure and accessibility. */
+  --accent-color: #EAEAEA; /* A very light grey, offering contrast without being overly stark, ensuring text remains readable. */
+  --text-color: #2A2A2A; /* A near-black dark grey */
+}
+.in-game-reference {
+  --main-color: #96A299; /* A muted sage green, evoking the look of aged tomes or moss-covered ruins, creating a grounded, immersive feel. */
+  --secondary-color: #CBD7CA; /* A pale, misty green, similar to lichen-covered stone, maintaining the natural, subdued theme. */
+  --accent-color: #E3E3E3; /* A soft, almost-white grey, ensuring text and highlights remain clear and easy to read. */
+  --text-color: #3D4B47; /* A deep, muted green-grey */
+}
+.monster-reference {
+  --main-color: #8B2E2E; /* Deep Blood Red */
+  --secondary-color: #C75C5C; /* Dark Crimson */
+  --accent-color: #E8B4B8; /* Muted Rose */
+  /*  --text-color: #4D0E0E; /* Dark Maroon */
+  --text-color: #3B0A0A; /* Near Black Red */
+  /* Alternate text colour #3B0A0A (Near Black Red). */
+}

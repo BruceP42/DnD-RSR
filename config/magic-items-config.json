@@ -1,0 +1,12 @@
+{
+  "controlledVocabularies": {
+    "rarity": {
+      "ordered": true,
+      "values": ["Varies", "Common", "Uncommon", "Rare", "Very Rare", "Legendary", "Artifact"]
+    },
+    "magic_item_category": {
+      "ordered": false,
+      "values": ["Armor", "Potion", "Ring", "Rod", "Scroll", "Staff", "Wand", "Weapon", "Wondrous Item"]
+    }
+  }
+}

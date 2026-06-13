@@ -1,0 +1,84 @@
+/* typography.css */
+/* paragraph */
+p {
+  display: block;
+  margin: 0;
+}
+
+/* Spacing of first and last paragraphs */
+p:first-of-type {
+  margin-top: 30px;  /* Extra spacing before the first paragraph in a group */
+}
+p:last-of-type {
+  margin-bottom: 30px;/* Extra spacing after the last paragraph in a group */
+}
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+  margin-top: 0.5em;
+  margin-bottom: 0.25em;
+  padding: 0;
+}
+
+h2 { padding-left: 15px; }
+h3 { padding-left: 30px; }
+h4 { padding-left: 45px; }
+h5 { padding-left: 60px; }
+h6 { padding-left: 75px; }
+
+/* General Purpose Selectors */
+/* sub-heading doesn't work the way I want it to */
+.sub-heading {
+  font-size: .75em;
+  font-style: italic;
+}
+
+/* a class for Titles */
+/* Titles are centered and in Italic */
+.title {
+  text-align: center;
+  font-style: italic;
+  font-size: 300%;
+  margin: 0 auto;
+}
+
+/* a class for Attributions */
+/* Attributions are Left aligned, in Italic, and smaller than normal text
+   they are used to acknowledge who created something usually all the content on a page */
+.attribution {
+  text-align: left;
+  font-style: italic;
+  font-size: 80%;
+  text-indent: 0;
+}
+
+/* a class for Citations */
+/* Citations are Left aligned, in Italic, and smaller than Attributions text */
+.citation {
+  text-align: left;
+  font-style: italic;
+  font-size: 70%;
+  text-indent: 0;
+}
+
+.block-quote {
+  margin-left: 80px;
+  border-left: 2px solid var(--text-color);  /* Creates a vertical line on the left */
+  border-right: 2px solid var(--text-color); /* Creates a vertical line on the right */
+  padding: 0 10px;
+  width: fit-content; /* Adjusts width to content */
+  max-width: 100%; /* Prevents overflow */
+  text-indent: 0;
+  font-style: italic;
+}
+.tag {
+/* a class for tags or key words */
+/* Tags are the same as Attributions!! This needs to change!! are Left aligned, in Italic, and smaller than normal text */
+  text-align: left;
+  font-style: italic;
+  font-size: 80%;
+  text-indent: 0;
+}
+.contrast-text {
+  color: var(--secondary-color)
+}

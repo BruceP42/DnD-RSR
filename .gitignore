@@ -1,0 +1,45 @@
+# ---------------------------------------------------------
+# Path:         .gitignore
+# File:         .gitignore
+# Version:      V1.0
+# System:       DnD-RSR — D&D 5e Dynamic Reference System
+# Module/Role:  Git ignore rules — excludes pipeline intermediates,
+#               local backup files, versioned working copies, and OS noise
+# Created:      2026-06-13
+# Last Updated: 2026-06-13
+# ---------------------------------------------------------
+
+# Pipeline intermediate output — generated, never commit
+pipeline/data/normalized/
+pipeline/data/aggregated/
+pipeline/data/verified/
+
+# Pipeline flag
+pipeline-needed.flag
+
+# Local backup files
+*.bak
+
+# Local versioned working copies (e.g. helpersV12.js, engine-factoryV24.js)
+*V[0-9]*.js
+
+# Junk / local output files
+results.txt
+Pipeline-v3-results.txt
+localhost-results.txt
+dependency-report.txt
+pipeline-dependency-report-dnd-rsr.txt
+
+# Local utility scripts not part of the public project
+copy-missing-files.ps1
+pipeline-copy-missing-files-dnd-rsr.ps1
+
+# Zip archives
+*.zip
+
+# Node
+node_modules/
+
+# OS
+Thumbs.db
+.DS_Store

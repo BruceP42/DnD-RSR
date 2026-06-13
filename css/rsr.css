@@ -1,0 +1,1556 @@
+/* ---------------------------------------------------------
+   Path:         css/rsr.css
+   File:         rsr.css
+   Version:      V3.2
+   System:       DnD-RSR — D&D 5e Dynamic Reference System
+   Module/Role:  Runtime card/table/split-pane layout styles
+                 for index.html in DnD-RSR.
+                 
+                 This file owns all RSR styles: layout,
+                 design tokens, font declaration, and all
+                 content absorbed from the retired site.css.
+   Dependencies: runtime/js/_core/rsr-layout.js (sets layout vars --site-header-height and --rsr-header-height via ResizeObserver on #fixed-header)
+   Created:      2026-03-21
+   Last Updated: 2026-06-02 (V3.2)
+   Author:       Bruce Pilcher
+
+   Change Log:
+    V3.2: Added .scroll-top-image rule (2026-06-02).
+      Rule was previously in image-effects.css which is not
+      linked in DnD-RSR. Without it the parchment scroll image
+      rendered at its natural width (2289px), overflowing the
+      viewport. Rule placed before parchment background section.
+    V3.1: Cleanup for DnD-RSR public repository (2026-05-24).
+      Removed .monster-doc-block section (Google Docs export
+      CSS, not needed by dynamic renderer).
+      Removed #rsr-header-placeholder h1 (no h1 in index.html
+      RSR header).
+      Removed --parchment-v-border from layout :root.
+      Fixed double image path on .monster-divider.
+      Fixed broken CSS syntax on .stat-block .divider.
+    V3.0: Adapted for DnD-RSR public repository (2026-05-24).
+      Path updated from runtime/css/ to css/.
+      All image paths updated from ../../images/ to ../images/.
+      All font paths updated from ../../fonts/ to ../fonts/.
+      Removed all references to layout-loader.js.
+      RSR fixed header comment updated for inline header.
+    V2.6: Dynamic layout measurement.
+      --site-header-height and --rsr-header-height added to :root as fallback values; overridden at runtime by rsr-layout.js via ResizeObserver on #fixed-header.
+      --view-top updated to use these variables. 
+      #rsr-header-placeholder top changed from --parchment-v-border to --site-header-height so the RSR nav sits below the site header on the open parchment.
+      height changed to auto; overflow changed to visible so filters are not clipped. 
+      Duplicate :root and rule blocks inadvertently added at top of file removed.
+    V2.5: Step 13 — shared header integration.
+      #rsr-header-placeholder is the RSR domain nav container (distinct from the inlined site header).
+      :root design tokens added (--main-color, --secondary-color, --accent-color, --text-color, --background-color, --highlight-red) — previously supplied by the retired site.css.
+      @font-face added for IM Fell English SC and IM Fell English — path ../fonts/ from css/. 
+      #data-warning-banner moved here from css/base.css. 
+      Absorbed from site.css: .add-content form styles (section 17), .detail-card group (section 19). monster-doc-block (section 20) removed in V3.1 — not needed in DnD-RSR.
+      site.css is now retired.
+    V2.4: Badge icon section rewritten
+      — .spell-icons positioning extended to magic-items domain.
+      .icon base rule generalised to .card .spell-icons .icon (was scoped to spells only).
+      .icon.ritual and .icon.concentration switched from background-color to background-image (ritual.png, concentration.png).
+      .icon.attunement added using attunement.svg (bound gem icon).
+      Added .card-field, .card-field-label, .card-field-value styles — emitted by card-renderer but previously unstyled.
+      .card-field-label::after adds colon separator. 
+      Footer class names corrected: .card-footer-left/.card-footer-right renamed to .card-footer-actions/.card-footer-sources to match card-renderer.js V2.3 output.
+      Filter bar control styles added for input, select, number inputs, checkbox, and reset button.
+    V2.3: Changed font-family in .stat-block, .stat-block h2, and .stat-block h3.
+--------------------------------------------------------- */
+
+
+/* =========================================================
+   DESIGN TOKENS
+   Absorbed from retired runtime/css/site.css V1.0.
+   These tokens are referenced throughout both rsr.css and the site CSS — declaring them here ensures index.html has them.
+========================================================= */
+
+:root {
+  --main-color:       #888888;  /* dark grey */
+  --secondary-color:  #cccccc;  /* default grey */
+  --accent-color:     #C0B4A3;  /* soft warm grey */
+  --text-color:       #333333;  /* default dark text */
+  --background-color: #f3dbbf;  /* parchment */
+  --highlight-red:    #7A0000;  /* official 5e-style deep red */
+}
+
+
+/* =========================================================
+   FONT FACES
+   Absorbed from retired runtime/css/site.css V1.0.
+   Path from css/ to fonts directory: ../fonts/
+========================================================= */
+
+@font-face {
+  font-family: 'IM Fell English SC';
+  src: url('../fonts/IM FELL English SC.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IM Fell English';
+  src: url('../fonts/im-fell-english-v14-latin-regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+/* =========================================================
+   LAYOUT CUSTOM PROPERTIES
+
+   Parchment image: 2297 x 2898 px at 120 ppi, aspect 1.262.
+   background-size: 100% auto — image fills viewport width,
+   height scales proportionally. Bottom curl goes off-screen.
+
+   Decorative borders that must stay clear of content:
+     - Top curl:   ~250 / 2898 = 8.6% of image height
+                   At 100vw wide, image height = 100vw * 1.262
+                   Top border in px = 0.086 * 1.262 * 100vw
+                   Approximated as: --parchment-v-border: 9vh
+     - Left/right: ~250 / 2297 = 10.9% of image width
+                   Approximated as: --parchment-h-border: 11vw
+   Bottom border: not needed (bottom curl is off-screen).
+
+   --site-header-height: fallback 307px; overridden at runtime
+     by rsr-layout.js (ResizeObserver on the site <header>).
+   --rsr-header-height: fallback 180px; overridden at runtime
+     by rsr-layout.js after RSR nav + filters render.
+   --view-top: sum of both headers — where #view-container begins.
+========================================================= */
+
+:root {
+  --site-header-height: 307px;  /* fallback; rsr-layout.js overrides */
+  --rsr-header-height:  180px;  /* fallback; rsr-layout.js overrides */
+  --parchment-bg-offset: 150px;  /* fallback; rsr-layout.js overrides */
+  --parchment-h-border: 11vw;
+  --view-top:           calc(var(--site-header-height) + var(--rsr-header-height));
+  --parchment-image:    url("../images/parchment-Full_bkgnd-same.png");
+}
+
+
+/* =========================================================
+   SITE HEADER — SCROLL TOP IMAGE
+   Constrains the parchment curl image to the full width of
+   #fixed-header. Without this the image renders at its
+   natural width (2289px) and overflows the viewport.
+   Moved here from image-effects.css which is not used in
+   DnD-RSR (single-page system, no multi-page image effects
+   needed).
+========================================================= */
+
+.scroll-top-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================================
+   PARCHMENT BACKGROUND LAYER
+   Fixed full-screen div behind all content at z-index: 0.
+   background-size: 100% auto — image fills full viewport
+   width and scales height proportionally (aspect ratio
+   2297x2898, ratio 1.262). The bottom curl goes off-screen
+   below the viewport; that is intentional — the bottom
+   decorative edge does not need to be visible.
+   Do NOT use cover, contain, or 100% 100%.
+========================================================= */
+
+#parchment-background {
+  position: fixed;
+  inset: 0;
+  background-image: var(--parchment-image);
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-position: left var(--parchment-bg-offset, 150px); 
+  z-index: 0;
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   RSR FIXED HEADER
+   #rsr-header-placeholder contains the domain nav and
+   #filters. top: --site-header-height positions it directly
+   below the site header on the open parchment area.
+   left/right insets keep it off the torn edges.
+   height: auto — sized by content so filters are never
+   clipped. overflow: visible for the same reason.
+   Background is transparent — the parchment layer shows through.
+
+   Note: in DnD-RSR the site header is inline in index.html.
+   rsr-layout.js observes #fixed-header directly via ResizeObserver.
+   No layoutHeaderReady event needed.
+   
+========================================================= */
+
+#rsr-header-placeholder {
+  position: fixed;
+  top: var(--site-header-height);  /* below site header, on open parchment */
+  left: var(--parchment-h-border);
+  right: var(--parchment-h-border);
+  height: auto;                    /* sized by content; filters not clipped */
+  z-index: 1001;                   /* above site header z-index: 1000 */
+  padding: 0.5rem 0 0.25rem 0;
+  box-sizing: border-box;
+  background: transparent;
+  overflow: visible;               /* filters must not be clipped */
+}
+
+/* nav inside the RSR fixed header */
+#rsr-header-placeholder nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  justify-content: center;
+}
+
+/* Nav links styled as fantasy buttons.
+   .fancy-scroll-button base styles are in the site CSS
+   these overrides keep them compact
+   inside the RSR header. */
+#rsr-header-placeholder nav a.fancy-scroll-button {
+  font-size: 0.95rem;
+  padding: 0.3em 0.8em;
+  min-width: 8em;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* #filters inside the RSR fixed header */
+#rsr-header-placeholder #filters {
+  /* Filter bar is rendered here by filter-utils.js.
+     Flex layout for the filter controls is set by the
+     controller via renderFilterBar(). */
+}
+
+#rsr-header-placeholder #filters form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.filter-group label {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--text-color, #333);
+}
+
+.filter-range-pair {
+  display: flex;
+  gap: 0.25em;
+}
+
+.filter-range-pair input {
+  width: 5em;
+}
+
+/* Filter bar control styling — inputs, selects, reset button */
+#filter-form input[type="text"],
+#filter-form select,
+#filter-form input[type="number"] {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.8rem;
+  color: #2b2b2b;
+  background-color: #fdf5e6;
+  border: 1px solid #9b8b6a;
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  box-sizing: border-box;
+}
+
+#filter-form input[type="text"]:focus,
+#filter-form select:focus,
+#filter-form input[type="number"]:focus {
+  outline: none;
+  border-color: #5a3e1b;
+  box-shadow: 0 0 0 2px rgba(90, 62, 27, 0.15);
+}
+
+#filter-form input[type="checkbox"] {
+  accent-color: #5a3e1b;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+
+#filter-form button.scroll-button {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.8rem;
+  color: #3a3a3a;
+  background-color: #f0e8d8;
+  border: 1px solid #9b8b6a;
+  border-radius: 3px;
+  padding: 0.25em 0.75em;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+#filter-form button.scroll-button:hover {
+  background-color: #e0d0b8;
+  border-color: #5a3e1b;
+}
+
+
+/* =========================================================
+   DATA WARNING BANNER
+   Moved from css/base.css (Step 13). Belongs here because
+   the banner is RSR-specific — it signals that data in the
+   reference views may be from an unrun pipeline.
+========================================================= */
+
+#data-warning-banner {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #b91c1c;
+  color: #fff;
+  padding: 0.5em 1em;
+  border-radius: 0.5em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: 0.9rem;
+  max-width: 300px;
+  z-index: 9999;
+}
+
+#data-warning-banner strong {
+  display: block;
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   SCROLLABLE VIEWPORT — #view-container
+   top: --view-top clears the decorative top curl + RSR header.
+   bottom: 0 — no bottom curl to avoid (it is off-screen).
+   left/right insets keep content off the torn side edges.
+   Both child panes scroll independently inside this container.
+========================================================= */
+
+#view-container {
+  position: fixed;
+  top: var(--view-top);
+  bottom: 0;
+  left: var(--parchment-h-border);
+  right: var(--parchment-h-border);
+  z-index: 1;
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   LEFT PANE — #results (table)
+   Single-column: full width.
+   Split-pane: ~55% width, independently scrollable.
+========================================================= */
+
+#results {
+  flex: 55;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   RIGHT PANE — #card-pane (card stack)
+   Hidden until .split-active is added to #view-container.
+   Split-pane: ~45% width, independently scrollable.
+   Left border provides visual separation from #results.
+========================================================= */
+
+#card-pane {
+  flex: 45;
+  min-width: 0;
+  display: none;           /* hidden until split-pane activates */
+  flex-direction: column;
+  overflow: hidden;        /* #card-stack handles scroll */
+  border-left: 1px solid #9b8b6a;
+  box-sizing: border-box;
+
+  /* Slight parchment tint to differentiate card pane */
+  background-color: rgba(243, 219, 191, 0.35);
+}
+
+/* Activate split-pane — JS adds .split-active to #view-container */
+#view-container.split-active #card-pane {
+  display: flex;
+}
+
+/* Card pane toolbar — close button, future stack controls.
+   Sticky at the top of the card pane; does not scroll. */
+#card-pane-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid #9b8b6a;
+  background-color: rgba(243, 219, 191, 0.6);
+}
+
+#card-pane-close {
+  background: none;
+  border: 1px solid #9b8b6a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  color: #3a3a3a;
+  font-family: 'IM Fell English SC', serif;
+}
+
+#card-pane-close:hover {
+  background: rgba(243, 219, 191, 0.8);
+}
+
+/* Scrollable card list.
+   flex: 1 fills remaining height after the toolbar. */
+#card-stack {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.75rem;
+  box-sizing: border-box;
+}
+
+/* Cards inside the stack lose their outer margin */
+#card-stack .card {
+  margin-top: 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE — collapse to single column below 768px.
+   Release fixed positioning so the page scrolls normally.
+   Parchment margins become padding instead of position offsets.
+========================================================= */
+
+@media (max-width: 768px) {
+
+  #rsr-header-placeholder {
+    position: static;
+    height: auto;
+    left: auto;
+    right: auto;
+    padding: 0.5rem var(--parchment-h-border);
+  }
+
+  #view-container {
+    position: static;
+    flex-direction: column;
+    overflow: visible;
+    padding: 0 var(--parchment-h-border);
+  }
+
+  #results {
+    flex: none;
+    width: 100%;
+    overflow-y: visible;
+    overflow-x: auto;
+    padding: 0;
+  }
+
+  #view-container.split-active #card-pane {
+    display: none;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   Unified Renderer - Base Card Styles
+--------------------------------------------------------- */
+/* TODO: migrate to data-domain scoping */
+.card {
+  position: relative;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  font-family: serif;
+  color: #2b2b2b;
+}
+
+/* ---------------------------------------------------------
+   Domain-specific Card Styling
+--------------------------------------------------------- */
+
+/* Spell cards */
+.card[data-domain="spells"] {
+  background: #f5f0e6;
+  border: 1px solid #9b8b6a;
+}
+
+/* Magic-item cards */
+.card[data-domain="magic-items"] {
+  background: #e6f0f5;
+  border: 1px solid #6a8b9b;
+}
+
+/* ---------------------------------------------------------
+   Card Fields Block
+--------------------------------------------------------- */
+.card .card-fields p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------
+   Description Block
+--------------------------------------------------------- */
+.card .description {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* ---------------------------------------------------------
+   Card Field Rows
+   Emitted by card-renderer.js as .card-field / .card-field-label
+   / .card-field-value. Colon separator added via ::after so
+   template label strings stay clean (no trailing punctuation).
+--------------------------------------------------------- */
+.card-field {
+  display: flex;
+  gap: 0.35em;
+  align-items: baseline;
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.card-field-label {
+  font-weight: bold;
+  color: #5a3e1b;
+  flex-shrink: 0;
+}
+
+.card-field-label::after {
+  content: ":";
+}
+
+.card-field-value {
+  color: #2b2b2b;
+}
+
+/* HTML-producing formatters (paragraphs, abilityScores) occupy
+   their own block row rather than sitting inline after the label. */
+.card-field-html {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+/* ---------------------------------------------------------
+   Badge Icons — ritual / concentration (spells), attunement (magic-items)
+   .spell-icons is the shared container class regardless of domain.
+--------------------------------------------------------- */
+.card[data-domain="spells"] .spell-icons,
+.card[data-domain="magic-items"] .spell-icons {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.card[data-domain="spells"] .spell-icons .icon,
+.card[data-domain="magic-items"] .spell-icons .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.card[data-domain="spells"] .icon.ritual,
+.card[data-domain="magic-items"] .icon.ritual {
+  background-image: url("../images/ritual.svg");
+}
+
+.card[data-domain="spells"] .icon.concentration,
+.card[data-domain="magic-items"] .icon.concentration {
+  background-image: url("../images/concentration.svg");
+}
+
+.card[data-domain="spells"] .icon.attunement,
+.card[data-domain="magic-items"] .icon.attunement {
+  background-image: url("../images/attunement.svg");
+}
+
+/* ---------------------------------------------------------
+   Domain-specific Card Styling
+--------------------------------------------------------- */
+
+/* Monsters only */
+.card[data-domain="monsters"] {
+  background: #fdf7e3;
+  border: 1px solid #7a5c2e;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  max-width: 42rem;
+  color: #2b1d0e;
+}
+
+/* Monster name + CR */
+.card[data-domain="monsters"] h2 {
+  font-size: 1.6rem;
+  margin: 0 0 0.25rem 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #7a5c2e;
+}
+
+/* Remove default card padding if any */
+.card[data-domain="monsters"] .description {
+  padding: 0;
+}
+
+/* Internal monster layout */
+.monster-card {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* Meta line */
+.monster-meta {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+/* Defensive stats */
+.monster-defences {
+  margin-bottom: 0.5rem;
+}
+
+/* Ability strip */
+.monster-abilities .stat-line {
+  padding: 0.35rem 0;
+  border-top: 1px solid #7a5c2e;
+  border-bottom: 1px solid #7a5c2e;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+
+/* Actions */
+.monster-actions p {
+  margin: 0.15rem 0;
+  text-indent: -0.75rem;
+  padding-left: 0.75rem;
+  line-height: 1.25;
+}
+
+.monster-actions .action-name {
+  font-weight: bold;
+}
+.card[data-domain="monsters"] .monster-traits h3 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--accent-color);
+}
+
+.card[data-domain="monsters"] .monster-traits p {
+  margin: 0.15rem 0;
+  line-height: 1.25;
+  padding-left: 0.75rem;
+  text-indent: -0.75rem;
+}
+
+/* ---------------------------------------------------------
+   Monster Section Divider — tapered line with fallback
+--------------------------------------------------------- */
+.card[data-domain="monsters"] .monster-divider {
+  height: 6px; /* matches image height */
+  margin: 0.75rem 0;
+  opacity: 0.9;
+
+  /* Fallback: CSS tapered gradient */
+  background: linear-gradient(to right, transparent, #7a5c2e, transparent);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /* Primary: tapered line image (overrides fallback if loads) */
+  background-image: url("../images/TaperedLine.png"), linear-gradient(to right, transparent, #7a5c2e, transparent);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ---------------------------------------------------------
+   Card Footer (Shared for all cards)
+--------------------------------------------------------- */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #9b8b6a;
+  font-size: 0.85rem;
+  color: #3a3a3a;
+}
+
+.card-footer-left,
+.card-footer-right { flex: 1; }
+
+/* Sources List Styling */
+.card-footer-left .sources {
+  margin: 0;
+  padding: 0;
+}
+
+.card-footer-left .sources ul {
+  list-style-type: disc;
+  margin: 0.25rem 0 0 1.2rem;
+  padding: 0;
+}
+
+.card-footer-left .sources li { line-height: 1.3; }
+
+/* Stat-block trigger button in card footer — scale down fancy-scroll-button
+   to fit the card footer context. The base class sets 20px / 12px 24px;
+   these overrides match the nav bar scale used in #rsr-header-placeholder. */
+.card-footer-right .fancy-scroll-button {
+  font-size: 0.95rem;
+  padding: 0.3em 0.8em;
+}
+
+/* ---------------------------------------------------------
+   Sort Indicators
+--------------------------------------------------------- */
+
+.unified-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.unified-table th .sort-indicator {
+  margin-left: 0.25em;
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
+.unified-table th.sorted-asc .sort-indicator::after {
+  content: "▲";
+}
+
+.unified-table th.sorted-desc .sort-indicator::after {
+  content: "▼";
+}
+
+/* Split-pane layout rules are in the LAYOUT section above. */
+/* =========================================================
+   A. TABLE STYLES
+   Append after existing table rules if any, or after the
+   split-pane layout block.
+========================================================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: var(--secondary-color);
+  color: var(--accent-color);
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+td.no-padding {
+  padding: 0;
+}
+
+th {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+}
+
+tr {
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+tr:nth-child(even) {
+  background-color: var(--main-color);
+  color: var(--secondary-color);
+}
+
+tr:nth-child(odd) {
+  background-color: var(--secondary-color);
+  color: var(--main-color);
+}
+
+tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Sortable column headers */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+th.sortable:hover {
+  background-color: #f0f0f0;
+}
+
+th.sortable::after {
+  content: " ⇅";
+  font-size: 0.8em;
+  margin-left: 4px;
+  position: absolute;
+  right: 8px;
+  color: #999;
+}
+
+th.sortable.asc::after  { content: " ↑"; }
+th.sortable.desc::after { content: " ↓"; }
+th.sortable:hover::after { color: #333; }
+
+
+/* =========================================================
+   B. MONSTER STAT-BLOCK (5e-style)
+   Append after Domain-specific Card Styling block.
+========================================================= */
+
+/* ---------------------------------------------------------
+   Monster Statblock
+--------------------------------------------------------- */
+
+/* Statblock root */
+.stat-block {
+  background-color: rgb(245, 240, 220);
+  background-image: url("../images/parchment-texture.jpg");
+  background-size: cover;
+  background-blend-mode: overlay;
+  color: #2b1d0e;
+  border: 2px solid #5e3c2a;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: Georgia, serif;
+}
+
+/* Override global heading padding-left inside stat-block */
+.stat-block h2 {
+  padding-left: 0;
+  font-size: 1.6rem;
+  margin: 0 0 0.25rem 0;
+  color: var(--highlight-red);
+  font-family: "IM Fell English SC", serif;
+}
+.stat-block h2::first-letter {
+  font-size: 2.2rem;
+}
+
+.stat-block em {
+  color: #3a2a1a;
+  font-size: 0.95rem;
+}
+
+.stat-block h3 {
+  padding-left: 0;
+  font-size: 1.3rem;
+  margin: 1rem 0 0.25rem 0;
+  color: var(--highlight-red);
+  font-family: "IM Fell English SC", serif;
+}
+
+.stat-block p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.stat-block strong {
+  color: var(--highlight-red);
+}
+
+.stat-block .item strong {
+  color: #2b1d0e;
+}
+
+/* Red highlight for important stats */
+.highlight-red {
+  color: var(--highlight-red);
+  font-weight: bold;
+}
+
+/* Ability scores row */
+.stat-block-abilities {
+  color: var(--highlight-red);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0.75rem 0;
+}
+
+.stat-block-abilities .ability {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-block-abilities .abbr {
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.stat-block-abilities .score {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.stat-block-abilities .mod {
+  font-size: 0.9rem;
+}
+
+/* Traits, Actions, Reactions sections */
+.stat-block .section {
+  margin: 0.75rem 0;
+}
+
+.stat-block .item {
+  margin: 0.25rem 0;
+}
+
+.stat-block .item-name {
+  font-weight: bold;
+  color: var(--highlight-red);
+  display: inline;
+}
+
+.stat-block .item-description {
+  display: inline;
+  margin-left: 0.25rem;
+}
+
+.stat-block .divider {
+  height: 6px;
+  background-image: url("../images/TaperedLine.png"),
+                  linear-gradient(to right, transparent, #7a5c2e, transparent);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0.75rem 0;
+  opacity: 0.9;
+}
+
+.stat-block .source-list {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #2b1d0e;
+}
+
+.stat-block .source-list div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-block .source-list p {
+  margin: 0;
+  text-align: left;
+}
+
+/* =========================================================
+   C. CARD CONTENT RENDERER CLASSES
+   Append after the monster stat-block block.
+   These classes are used by the entry renderer to display
+   structured 5e content (spells, items, monsters) inside
+   cards.
+========================================================= */
+
+/* ---------------------------------------------------------
+   Card Content Renderer
+--------------------------------------------------------- */
+
+/* Inset callout box */
+.inset {
+  border: 2px solid #b49467;
+  background-color: #fdf5e6;
+  padding: 1em;
+  margin: 1em 0;
+  border-radius: 4px;
+  box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+.inset-title {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #5a3e1b;
+}
+
+/* Quoted block */
+.quote-block {
+  border-left: 4px solid #b49467;
+  background-color: #fdf5e6;
+  padding: 0.75em 1em;
+  margin: 1em 0;
+  font-style: italic;
+}
+
+.quote-line {
+  margin: 0.5em 0;
+}
+
+.quote-source {
+  margin-top: 0.5em;
+  font-size: 0.9em;
+  font-style: normal;
+  color: #5a3e1b;
+}
+
+.quote-by {
+  font-weight: bold;
+}
+
+/* Ability entries */
+.ability-entry {
+  margin-bottom: 0.75em;
+  text-indent: 0;
+}
+
+.ability-block {
+  margin: 1em 0;
+}
+
+.ability-block strong {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3em;
+}
+
+.ability-sub {
+  margin: 0.5em 0 0.5em 1em;
+}
+
+.ability-sub em {
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* Note block */
+.note-block {
+  border-left: 4px solid var(--note-color, #999);
+  padding-left: 12px;
+  margin: 1em 0;
+  font-style: italic;
+  background: rgba(240, 240, 240, 0.4);
+}
+
+/* Nested entries */
+.entries-nested {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--accent-color, #999);
+}
+
+.nested-entry h4 {
+  margin: 0.5em 0 0.2em;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+/* Option block */
+.option-block {
+  background-color: var(--parchment-light, #fdf9f0);
+  border: 1px dashed var(--accent-color, #666);
+  padding: 0.75em 1em;
+  margin: 1em 0;
+  border-radius: 4px;
+}
+
+.option-block ul {
+  margin: 0.5em 0 0;
+  padding-left: 1.2em;
+}
+
+.option-block li {
+  margin-bottom: 0.4em;
+}
+
+/* Horizontal rule divider between entries */
+.entry-divider {
+  border: 0;
+  border-top: 2px solid var(--accent-color, #666);
+  margin: 1em 0;
+}
+
+/* Entry image */
+.entry-image {
+  text-align: center;
+  margin: 1em 0;
+}
+
+.entry-image img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #999;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Item fluff / flavour text */
+.item-fluff {
+  font-style: italic;
+  font-size: 0.95em;
+  color: var(--text-muted, #444);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-top: 1em;
+  padding-top: 0.75em;
+}
+
+/* Inline reference link */
+.entry-ref {
+  font-weight: bold;
+  color: var(--link-color, #2a5d9f);
+  cursor: help;
+  border-bottom: 1px dotted currentColor;
+}
+
+.entry-ref:hover {
+  color: var(--link-hover-color, #1a3d6f);
+}
+
+/* Variant block */
+.variant-block {
+  border-left: 4px solid var(--accent-color, #886644);
+  background-color: rgba(255, 248, 220, 0.4);
+  padding: 0.75em 1em;
+  margin: 1em 0;
+  font-style: italic;
+  border-radius: 4px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.variant-title {
+  margin-top: 0;
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Dice roll entry */
+.dice-roll {
+  margin: 0.5em 0;
+  font-style: italic;
+  color: var(--text-color-secondary, #444);
+}
+
+/* Roll table entries */
+.roll-entry {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--text-color, #ccc);
+  border-radius: 4px;
+}
+
+.roll-label {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.roll-list {
+  padding-left: 1.25em;
+  margin: 0;
+  list-style-type: none;
+}
+
+.roll-list li::before {
+  content: "🎲 ";
+  margin-right: 0.25em;
+  color: var(--accent-color, #aaa);
+}
+
+.roll-inline .roll-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em 1em;
+}
+
+.roll-inline .roll-list li {
+  display: inline-block;
+}
+
+/* Entry section with border */
+.entry-section {
+  margin: 1em 0;
+  padding: 0.75em 1em;
+  border: 1px solid var(--border-color, #999);
+  border-radius: 5px;
+  background-color: var(--entry-section-bg, #fdfaf4);
+}
+
+.section-title {
+  margin-top: 0;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Entry hyperlink */
+.entry-link {
+  color: var(--link-color, #3366cc);
+  text-decoration: underline;
+}
+
+.entry-link:hover {
+  color: var(--link-hover-color, #003399);
+}
+
+/* Higher-level casting block.
+   Rendered by the JS fragment extracted from combined.css.
+   JS belongs in the renderEntry() function in the spell
+   card renderer module. */
+.higher-level-block {
+  margin-top: 1em;
+  padding-top: 0.5em;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.higher-level-title {
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--highlight-red);
+  margin-bottom: 0.25em;
+}
+
+
+/* =========================================================
+   D. ROW ANIMATION
+   Append after the card content renderer block.
+========================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+tbody tr {
+  animation: fadeIn 0.5s ease-in;
+}
+
+
+/* =========================================================
+   EXTRACTED JAVASCRIPT — DO NOT LEAVE IN CSS
+   =========================================================
+   The following fragment was found inside combined.css
+   between the .variant-block and .dice-roll rules.
+   It is a rendering function fragment, not CSS.
+
+   WHERE IT BELONGS:
+   Place this inside the renderEntry() function (or its
+   equivalent) in the spell card renderer JS module —
+   likely unified-renderer.js or a card-renderer helper.
+
+   It handles entries of type "entriesHigherLevel" in the
+   5e spell data format, producing a .higher-level-block
+   div. The CSS classes it uses (.higher-level-block and
+   .higher-level-title) are now defined above in section C.
+
+   --- BEGIN EXTRACTED JS ---
+
+   if (entry.type === "entriesHigherLevel" && Array.isArray(entry.entries)) {
+     const title = entry.name
+       ? `<h3 class="higher-level-title">${entry.name}</h3>`
+       : `<h3>At Higher Levels</h3>`;
+     const content = entry.entries.map(renderEntry).join("\n");
+     return `<div class="higher-level-block">${title}${content}</div>`;
+   }
+
+   --- END EXTRACTED JS ---
+========================================================= */
+
+
+/* =========================================================
+   E. ADD-CONTENT FORM (MANAGE MODE)
+   Absorbed from retired runtime/css/site.css section 17.
+   Styles for the spell/item add-content form used in
+   appMode=manage / appMode=edit.
+========================================================= */
+
+.add-content {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--background-color);
+  padding: 2rem;
+  font-family: 'IM Fell English SC', serif;
+}
+
+.add-content .row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.add-content .row .field {
+  flex: 1 1 200px;
+}
+
+.add-content .row .field label {
+  min-width: 120px;
+}
+
+.add-content .row .field select {
+  max-width: 200px;
+}
+
+.add-content .field.horizontal {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.add-content .field.horizontal label {
+  margin-bottom: 0;
+  font-weight: bold;
+  min-width: 120px;
+}
+
+.add-content .field.horizontal select {
+  flex-grow: 1;
+  max-width: 200px;
+}
+
+.add-content .components-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.add-content .components-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: normal;
+}
+
+.component-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+#material-input {
+  vertical-align: middle;
+  width: 200px;
+  margin-left: 0.5em;
+}
+
+.material-wrapper {
+  display: inline-block;
+  opacity: 0;
+  transform: scaleY(0.8);
+  transform-origin: top;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  margin-left: 0.5rem;
+}
+
+.material-wrapper.show {
+  opacity: 1;
+  transform: scaleY(1);
+  pointer-events: auto;
+}
+
+.add-content .material-input {
+  flex-grow: 1;
+  max-width: 300px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.add-content .components-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.add-content .components-label {
+  white-space: nowrap;
+}
+
+.class-wrapper {
+  display: flex;
+  max-width: 500px;
+  width: 100%;
+}
+
+.class-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: center;
+  max-width: 500px;
+}
+
+.class-checkboxes label {
+  white-space: nowrap;
+}
+
+.class-checkboxes input[type="checkbox"] {
+  margin-right: -2.5em;
+  vertical-align: middle;
+}
+
+.class-instructions {
+  margin-top: 0.5em;
+  margin-left: 0;
+  font-size: 0.9em;
+  color: #444;
+}
+
+.add-content fieldset {
+  border: 2px groove #d4b36b;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  background-color: #fffdf4;
+}
+
+.add-content legend {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #5a452c;
+  padding: 0 0.5rem;
+}
+
+.add-content label {
+  display: block;
+  font-weight: bold;
+  margin-top: 0.75rem;
+  color: #4a3820;
+}
+
+.add-content input,
+.add-content textarea,
+.add-content select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border: 1px solid #d4b36b;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fefbf5;
+  font-family: inherit;
+}
+
+.add-content button,
+.add-content input[type="submit"] {
+  margin-top: 1.5rem;
+  background-color: var(--main-color);
+  color: #3a2d18;
+  border: 2px solid #a7884d;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.3s;
+}
+
+.add-content button:hover,
+.add-content input[type="submit"]:hover {
+  background: #e7c773;
+}
+
+@media (max-width: 600px) {
+  .add-content {
+    padding: 1rem;
+  }
+}
+
+
+/* =========================================================
+   F. DETAIL CARD
+   Absorbed from retired runtime/css/site.css section 19.
+   Legacy dataset-detail view styles. Not used in the current
+   index.html runtime.
+   manage mode work.
+========================================================= */
+
+.detail-card {
+  padding: 1em;
+  background: #f8f6e8;
+  border: 2px solid #b8a878;
+  border-radius: 10px;
+  margin: 1em 0;
+  font-family: serif;
+}
+
+.detail-title {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-bottom: 0.6em;
+  text-align: left;
+  border-bottom: 1px solid #b8a878;
+  padding-bottom: 0.3em;
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin: 0.3em 0;
+}
+
+.detail-label {
+  font-weight: bold;
+  width: 140px;
+}
+
+.detail-value {
+  flex: 1;
+}
+
+.detail-back {
+  margin-top: 1em;
+}
+
+
+/* ---------------------------------------------------------
+   Optional Future Domains
+--------------------------------------------------------- */
+/* Example: Monsters, Feats, etc. can use:
+.card[data-domain="monsters"] { background: #f0e6f5; border: 1px solid #8b6a9b; }
+*/

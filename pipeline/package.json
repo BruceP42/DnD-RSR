@@ -1,0 +1,19 @@
+{
+  "name": "pipeline-v3",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "build-all.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "yargs": "^18.0.0"
+  }
+}

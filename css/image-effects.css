@@ -1,0 +1,89 @@
+/* image-effects.css */
+/* .scroll-top-image is used to style the img tag for the top of the sheet of parchment */
+.scroll-top-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: static;   /* Or just remove 'position' entirely */
+  z-index: auto;      /* Or remove if previously set */
+  margin: 0;
+  padding: 0;
+}
+
+
+/* Figures and Captions */
+figure {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Thumbnail appearance */
+.hover-thumb {
+  width: 150px;
+  height: auto;
+  transition: transform 0.2s;
+  border: 1px solid #888;
+  cursor: zoom-in;
+}
+
+/* Container holds the larger image on hover */
+.hover-zoom-link {
+  position: relative;
+  display: inline-block;
+}
+
+/* Larger version on hover */
+.hover-zoom-link:hover::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 100%;
+  width: 400px; /* size of enlarged image */
+  height: 400px;
+  background-image: url('Images/full-image.webp');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 2px solid #aaa;
+  background-color: #fff;
+  z-index: 999;
+}
+
+/* Style the caption text */
+/* I added this as some of the caption text was hard to read against the Background colour. */
+caption {
+  font-size: 1em; /* Don't increase text size */
+  font-weight: bold; /* Make text bold */
+  text-align: center; /* Center the text */
+  color: var(--main-color);
+  background-color: var(--accent-color);
+  padding: 10px; /* Add spacing around the text */
+  border-bottom: 2px solid #444; /* Add a border below */
+}
+/* Left and right Picture are used to left or right align an img tag.
+To use with figure tags the class must be in the figure element. */
+.leftPicture {
+  float:left;
+  margin: 0 30px 0 0;
+  border: 2px solid var(--main-color);
+}
+.rightPicture {
+  float:right;
+  margin: 0 0 0 15px;
+  border: 2px solid var(--main-color);
+ }
+figcaption {
+  margin-top: 8px;     margin-top: 8px; /* Adjust as needed */
+  font-style: italic;
+}
+/* Responsive images */
+.responsive {
+  max-width: 100%;
+  height: auto;
+}
+.responsive-img {
+  width: 100%;  /* Makes the image 1/4 the width of the page */
+  height: auto; /* Keeps aspect ratio */
+  max-width: 100%; /* Prevents overflow on smaller screens */
+}

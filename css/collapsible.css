@@ -1,0 +1,21 @@
+/* collapsible.css */
+/* Styling to enable a collapsed div to expand when clicked on revealing the content div */
+/* used on main landing page */
+.collapsible {
+  vertical-align: text-top;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+}
+.collapsible:hover {
+  background-color: #e0e0e0;
+}
+.content {
+  display: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}

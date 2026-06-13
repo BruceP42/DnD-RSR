@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!-- ---------------------------------------------------------
+   Path:         index.html
+   File:         index.html
+   Version:      V1.0
+   Data Schema:  V1.1
+   System:       DnD-RSR — D&D 5e Dynamic Reference System
+   Module/Role:  Single-page entry point. URL-driven, domain-agnostic
+                 reference UI. Domain determined at runtime from the
+                 URL ?domain= parameter. Handles both browse and edit
+                 (appMode=edit) modes.
+   Dependencies:
+     - css/ (site-wide and RSR stylesheets)
+     - fonts/IM FELL English SC.css
+     - runtime/js/_core/pipeline-banner.js
+     - runtime/js/_core/rsr-layout.js
+     - runtime/js/controllers/{domain}-controller.js (dynamic import)
+     - runtime/js/controllers/add-edit-controller.js (dynamic import,
+       appMode=edit only)
+   Created:      2026-05-24
+   Author:       Bruce Pilcher
+   Changelog:
+     V1.0: Initial version for DnD-RSR public repository.
+       Replaces reference.html from the personal D&D site.
+       Inlines header and footer — no layout-loader.js needed
+       since this is a single-page system.
+       All paths are root-relative (depth 1).
+       CSS and images consolidated into single directories.
+       rsr-layout.js uses ResizeObserver directly — no
+       layoutHeaderReady event needed.
+   Notes:
+     - URL is the single source of truth for domain and appMode
+     - No domain knowledge in this file
+     - appMode=edit routes to add-edit-controller.js
+     - All other appModes route to {domain}-controller.js
+     - #filters populated by controller via renderFilterBar()
+     - #results populated by controller via referenceService
+     - #card-pane populated by controller in browse mode
+     - .split-active on #view-container managed by controller
+     - --site-header-height and --rsr-header-height set dynamically
+       by rsr-layout.js via ResizeObserver
+   Related Files:
+     css/rsr.css
+     runtime/js/controllers/spells-controller.js
+     runtime/js/controllers/monsters-controller.js
+     runtime/js/controllers/magic-items-controller.js
+     runtime/js/controllers/add-edit-controller.js
+     runtime/js/_core/pipeline-banner.js
+     runtime/js/_core/rsr-layout.js
+     runtime/js/_core/filter-utils.js
+     runtime/js/_core/sort-utils.js
+--------------------------------------------------------- -->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DnD Reference System</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Fonts -->
+  <link rel="stylesheet" href="fonts/IM FELL English SC.css">
+
+  <!-- Site-wide CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/typography.css">
+  <link rel="stylesheet" href="css/table.css">
+  <link rel="stylesheet" href="css/list.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/collapsible.css">
+  <link rel="stylesheet" href="css/flex.css">
+  <link rel="stylesheet" href="css/background.css">
+  <link rel="stylesheet" href="css/ribbon.css">
+  <link rel="stylesheet" href="css/spell-card.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/section.css">
+  <link rel="stylesheet" href="css/colour-themes.css">
+  <link rel="stylesheet" href="css/footer.css">
+  <link rel="stylesheet" href="css/utility.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/monster-statblock.css">
+
+  <!-- RSR stylesheet -->
+  <link rel="stylesheet" href="css/rsr.css">
+
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       SITE HEADER
+       Fixed at top. Contains the parchment scroll image
+       and ribbon title. Height measured by rsr-layout.js
+       via ResizeObserver — drives --site-header-height.
+  ════════════════════════════════════════════════════ -->
+  <header id="fixed-header">
+    <div class="ribbon">DnD Reference</div>
+    <img id="scroll-top-image"
+         src="images/parchment-top3.png"
+         alt="Decorative parchment scroll top"
+         class="scroll-top-image">
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════
+       PARCHMENT BACKGROUND
+       Fixed full-screen div behind all content.
+       z-index: 0. All content layers sit above this.
+       background-position set dynamically by rsr-layout.js
+       via --parchment-bg-offset so the texture aligns with
+       the top of the scroll image.
+  ════════════════════════════════════════════════════ -->
+  <div id="parchment-background"></div>
+
+  <!-- ═══════════════════════════════════════════════════
+       RSR HEADER
+       Fixed below the site header, on the open parchment.
+       Contains the domain nav and filter bar.
+       top: --site-header-height (set by rsr-layout.js).
+       Height auto — sized by content so filters are never
+       clipped. Measured by rsr-layout.js ResizeObserver
+       to drive --rsr-header-height and --view-top.
+  ════════════════════════════════════════════════════ -->
+  <div id="rsr-header-placeholder">
+
+    <nav>
+      <!-- Browse links -->
+      <a href="?domain=spells&view=summary&mode=table&appMode=browse"
+         class="fancy-scroll-button">Spells</a>
+      <a href="?domain=monsters&view=summary&mode=table&appMode=browse"
+         class="fancy-scroll-button">Monsters</a>
+      <a href="?domain=magic-items&view=summary&mode=table&appMode=browse"
+         class="fancy-scroll-button">Magic Items</a>
+
+      <!-- Add (edit) links — one per domain -->
+      <a href="?domain=spells&appMode=edit"
+         class="fancy-scroll-button">&#43; Spell</a>
+      <a href="?domain=magic-items&appMode=edit"
+         class="fancy-scroll-button">&#43; Magic Item</a>
+      <a href="?domain=monsters&appMode=edit"
+         class="fancy-scroll-button">&#43; Monster</a>
+      <a href="?domain=sources&appMode=edit"
+         class="fancy-scroll-button">&#43; Source</a>
+    </nav>
+
+    <!-- Filter bar — populated by domain controller -->
+    <div id="filters"></div>
+
+  </div>
+  <!-- End #rsr-header-placeholder -->
+
+  <!-- ═══════════════════════════════════════════════════
+       SCROLLABLE VIEWPORT
+       Fills screen below the RSR header.
+       top: --view-top (set by rsr-layout.js).
+       #results and #card-pane scroll independently.
+       JS adds .split-active when a row is clicked.
+  ════════════════════════════════════════════════════ -->
+  <div id="view-container">
+    <div id="results">Loading&hellip;</div>
+    <div id="card-pane">
+      <div id="card-pane-toolbar">
+        <button id="card-pane-close" type="button">&#x2715; Close</button>
+      </div>
+      <div id="card-stack"></div>
+    </div>
+  </div>
+  <!-- End #view-container -->
+
+  <!-- ═══════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════ -->
+  <footer>
+    <p>Original material &copy; A. Bruce Pilcher</p>
+    <p>All other material remains &copy; of the original copyright
+       holder. All such material is cited where such citations are
+       known.</p>
+    <p>Layout, design, and coding &copy; A. Bruce Pilcher</p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCRIPTS
+       rsr-layout.js: sets CSS layout variables via
+         ResizeObserver on #fixed-header and
+         #rsr-header-placeholder. No layoutHeaderReady
+         event needed — header is inline, available
+         immediately on DOMContentLoaded.
+       pipeline-banner.js: checks for pipeline-needed.flag
+         on the server. Non-blocking.
+       Domain controller: dynamically imported based on
+         ?domain= and ?appMode= URL parameters.
+  ════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { initPipelineBanner } from './runtime/js/_core/pipeline-banner.js';
+    import './runtime/js/_core/rsr-layout.js';
+
+    // Non-blocking — banner appears after flag check resolves.
+    // Does not delay controller initialisation.
+    initPipelineBanner();
+
+    const params  = new URLSearchParams(location.search);
+    const appMode = params.get('appMode') || 'browse';
+    const domain  = params.get('domain')  || 'spells';
+
+    const controllerPath = (appMode === 'edit' && !params.get('view'))
+      ? './runtime/js/controllers/add-edit-controller.js'
+      : `./runtime/js/controllers/${domain}-controller.js`;
+
+    const { run } = await import(controllerPath);
+    run();
+  </script>
+
+</body>
+</html>

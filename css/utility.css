@@ -1,0 +1,126 @@
+/* utility.css */
+/* General Purpose Selectors */
+
+.main {
+  padding: 16px;
+  margin-top: 3px;
+  height: 1500px; /* Used in this example to enable scrolling */
+}
+
+/* sub-heading doesn't work the way I want it to */
+.sub-heading {
+   font-size: 1.8rem;
+   font-style: italic; /* Makes text italic */
+}
+
+.title {
+  /* a class for Titles */
+  /* Titles are centered and in Italic */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-style: italic;
+  font-size: 300%;
+}
+
+/* A class primarily used to make something stand out for later editing i.e. WIP */
+.danger { 
+  color: red;
+  text-indent: 0;
+}
+
+.GM-notes {
+  /* A class for information that the GM or DM needs to know but shouldn't share with players */
+  border-style: dashed;
+  border-width: 2px;
+  padding: 5px;
+  text-indent: 0;
+}
+
+.box-text {
+  /* A class for Box Text. Text that is read verbatim or paraphrased for the players */
+  border-style: solid;
+  border-width: 3px;
+  padding: 5px;
+  text-indent: 0;
+}
+
+.sidebar {
+  float: right;
+  width: 25%;
+  margin: 0 0 1em 15px; /* space between sidebar and main text */
+  padding: 1em;
+  border: 2px solid var(--main-color);
+  color: var(--accent-color);
+  box-sizing: border-box;
+  font-size: 0.9em; /* Optional: slightly smaller text for sidebars */
+  background-image: url("../images/parchment-texture.jpg");
+  text-indent: 0;
+}
+
+.sidebar h1,
+.sidebar h2,
+.sidebar h3,
+.sidebar h4,
+.sidebar h5,
+.sidebar h6 {
+  color: var(--accent-color);
+}
+
+.attribution {
+  /* a class for Attributions */
+  /* Attributions are Left aligned, in Italic, and smaller than normal text */
+  /* they are used to acknowledge who created something usually all the content on a page */
+  text-align: left;
+  font-style: italic;
+  font-size: 80%;
+  text-indent: 0;
+}
+
+.citation {
+  /* a class for Citations */
+  /* Citations are Left aligned, in Italic, and smaller than Attributions text */
+  margin-top: 10px;
+  text-align: left;
+  font-style: italic;
+  font-size: 70%;
+  text-indent: 0;
+}
+
+.tag {
+  /* a class for tags or key words */
+  /* Tags are the same as Attributions!! This needs to change!! are Left aligned, in Italic, and smaller than normal text */
+  text-align: left;
+  font-style: italic;
+  font-size: 80%;
+  text-indent: 0;
+}
+
+.block-quote {
+  margin-left: 80px;
+  border-left: 2px solid var(--text-color); /* Creates a vertical line on the left */
+  border-right: 2px solid var(--text-color); /* Creates a vertical line on the right */
+  padding-left: 10px;
+  padding-right: 10px;
+  width: fit-content; /* Adjusts width to content */
+  max-width: 100%; /* Prevents overflow */
+  text-indent: 0;
+  font-style: italic;
+}
+
+.center-align {
+  text-align: center;
+}
+.left-align {
+  text-align: left;
+}
+.right-align {
+  text-align: right;
+}
+
+/* The tip class is used for a short item that needs to stand out from the page */
+.tip {
+  text-align: center;
+  font-size: 150%;
+  text-indent: 0;
+}

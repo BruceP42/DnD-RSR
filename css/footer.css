@@ -1,0 +1,8 @@
+/* footer.css */
+footer {
+  border-top: 2px solid #ccc; /* Creates a horizontal line */
+  padding-top: 10px; /* Adds some space above the content */
+  background-color: var(--background-color); /* makes the Background parchment colour */
+  text-indent: 0;
+  width: fit-content; /* Adjusts width to content. I may need to change this if the footer is ever too wide. */
+}

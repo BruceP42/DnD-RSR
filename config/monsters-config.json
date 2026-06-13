@@ -1,0 +1,8 @@
+{
+  "controlledVocabularies": {
+    "size": {
+      "ordered": true,
+      "values": ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"]
+    }
+  }
+}

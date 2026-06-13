@@ -1,0 +1,19 @@
+/* flexbox.css */
+/* Flex styling to enable horizontal columns as styled in flex-container */
+/* primarily used on main landing page */
+.flex-container {
+  display: flex;
+}
+.flex-container div {
+  background-color: var(--background-color);
+  margin: 1px;
+  padding: 2px;
+}
+
+/* two div styles to enable two equal width tables designed for the "setting a DC" page */
+#PHB-DC {
+  flex: 1; /* 50% of the flex container as there are two */
+}
+#hipsters-remix {
+  flex: 1; /* 50% of the flex container as there are two */
+}
