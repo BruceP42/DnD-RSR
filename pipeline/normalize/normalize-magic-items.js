@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------
 Path: pipeline/normalize/normalize-magic-items.js
 File: normalize-magic-items.js
-Version: V1.4
+Version: V1.5
 Data Schema: V1.1
 System: D&D Reference System – Data Pipeline V3.0
 Module/Role: Domain normalization for magic-items
@@ -9,34 +9,60 @@ Dependencies:
   - pipeline/_core/normalization-engine.js
   - pipeline/utils/helpers.js
 Created: 2026-03-10
-Last Updated: 2026-05-16
+Last Updated: 2026-06-16
+Author: Bruce Pilcher
 Changelog:
-  V1.4:
-    - desc → item_desc conversion now normalizes markdown table strings
-      to typed objects ({ type: "table", headers, rows }) via
-      _normalizeDescArray. Handles both raw formats found in source data:
-        SRD format   — each table row as a separate array element with a
-                       separator row (|---|---|) on line 1.
-        DMG14 format — entire table as a single \n-delimited string with
-                       no separator row.
-      Consecutive |-prefixed strings (SRD format) are collapsed by
-      _groupTableRows before parsing. Separator row detection uses a
-      regex check on line 1 so both formats resolve correctly.
-      Plain prose strings are passed through unchanged.
-      Already-typed objects are passed through unchanged (defensive).
-      After running the pipeline with this version and regenerating the
-      runtime dataset, remove _groupTableRows, the startsWith("|") branch,
-      and _renderMarkdownTable from formatter-common.js (V2.7).
-      See TODO: Migrate item_desc Markdown Tables to Structured Schema.
-  V1.3: Fix Null Pages added.
-  V1.2: Updated for pipeline/data/ directory structure with optional save.
   V1.1: Refactored to use core normalization engine.
+  V1.2: Updated for pipeline/data/ directory structure with optional save.
+  V1.3: Fix Null Pages added.
+  V1.4: desc → item_desc conversion now normalizes markdown table strings
+        to typed objects ({ type: "table", headers, rows }) via
+        _normalizeDescArray. Handles both raw formats found in source data:
+          SRD format   — each table row as a separate array element with a
+                         separator row (|---|---|) on line 1.
+          DMG14 format — entire table as a single \n-delimited string with
+                         no separator row.
+        Consecutive |-prefixed strings (SRD format) are collapsed by
+        _groupTableRows before parsing. Separator row detection uses a
+        regex check on line 1 so both formats resolve correctly.
+        Plain prose strings are passed through unchanged.
+        Already-typed objects are passed through unchanged (defensive).
+        After running the pipeline with this version and regenerating the
+        runtime dataset, remove _groupTableRows, the startsWith("|") branch,
+        and _renderMarkdownTable from formatter-common.js (V2.7).
+        See TODO: Migrate item_desc Markdown Tables to Structured Schema.
+  V1.5: Added lowercaseFields pass via helpers.js — lowers name,
+        magic_item_category, and rarity to canonical pipeline casing.
+        Removed redundant inline lowercasing for those three fields.
+        Display casing applied at render time only.
+        Note: magic_item_type lowercasing remains inline — it is part of
+        a rename-and-transform from item_type and cannot be expressed as
+        a simple field path.
+Related Files:
+  normalization-engine.js
+  helpers.js
+Notes:
+  - Supports field-level transformer hooks
+  - Incremental build-ready
+  - Normalized files now align with pipeline/data/normalized/
 --------------------------------------------------------- */
 
 import fs from "fs";
 import path from "path";
 import { normalizeRecord, normalizeBatch, NORMALIZED_DIR } from '../_core/normalization-engine.js';
-import { fixNullPages } from '../utils/helpers.js';
+import { fixNullPages, lowercaseFields } from '../utils/helpers.js';
+
+// Classificatory string fields to store lowercase in pipeline data.
+// Display casing is applied at render time — never stored in data.
+// item_desc, id, and attunement_restrictions are excluded — their
+// capitalisation is meaningful or case-sensitive.
+// Note: magic_item_type is lowercased inline because it is derived
+// from a field rename (item_type → magic_item_type).
+const LOWERCASE_FIELD_PATHS = [
+  "name",
+  "magic_item_category",
+  "rarity"
+];
 
 // ── Private — desc normalization ───────────────────────────────────────────
 
@@ -149,17 +175,9 @@ function transformMagicItemFields(item) {
     normalized.data_file_provenance = normalized.sources[0].source.toLowerCase();
   }
 
-  // ── normalize name ─────────────────────────────────────────────────────
-  if (normalized.name && typeof normalized.name === "string") {
-    normalized.name = normalized.name.trim().toLowerCase();
-  }
-
-  // ── normalize rarity ───────────────────────────────────────────────────
-  if (normalized.rarity && typeof normalized.rarity === "string") {
-    normalized.rarity = normalized.rarity.trim().toLowerCase();
-  }
-
   // ── normalize item subtype ─────────────────────────────────────────────
+  // Inline rather than via lowercaseFields — this is a rename-and-transform
+  // (item_type → magic_item_type), not a simple field lowercasing.
   if ("item_type" in normalized) {
     const subtype = normalized.item_type?.trim?.();
     if (subtype) {
@@ -187,15 +205,6 @@ function transformMagicItemFields(item) {
     normalized.attunement = Boolean(normalized.attunement);
   }
 
-  // ── normalize magic_item_category ─────────────────────────────────────
-  if (
-    normalized.magic_item_category &&
-    typeof normalized.magic_item_category === "string"
-  ) {
-    normalized.magic_item_category =
-      normalized.magic_item_category.trim().toLowerCase();
-  }
-
   // ── normalize attunement_restrictions ─────────────────────────────────
   if (!Array.isArray(normalized.attunement_restrictions)) {
     normalized.attunement_restrictions = [];
@@ -212,6 +221,10 @@ function transformMagicItemFields(item) {
   } else if (typeof normalized.bonus === "string") {
     normalized.bonus = normalized.bonus.trim();
   }
+
+  // ── lowercase classificatory string fields ─────────────────────────────
+  // Runs last. lowercaseFields mutates in place.
+  lowercaseFields(normalized, LOWERCASE_FIELD_PATHS);
 
   return normalized;
 }

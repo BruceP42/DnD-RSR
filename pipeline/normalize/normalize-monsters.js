@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------
 Path: pipeline/normalize/normalize-monsters.js
 File: normalize-monsters.js
-Version: V1.8
+Version: V1.9
 Data Schema: V1.1
 System: D&D Reference System – Data Pipeline V3.0
 Module/Role: Domain normalization for monsters
@@ -11,7 +11,7 @@ Dependencies:
   - pipeline/utils/logging.js
   - pipeline/utils/helpers.js
 Created: 2026-03-10
-Last Updated: 2026-06-10
+Last Updated: 2026-06-16
 Author: Bruce Pilcher
 Changelog:
   V1.1: Refactored to use core normalization engine
@@ -35,6 +35,11 @@ Changelog:
         into arrays. splitNewlineDesc is a no-op if no \n is present, so this
         step is safe to apply unconditionally to all action desc strings.
         splitNewlineDesc imported from helpers.js.
+  V1.9: Added lowercaseFields pass via helpers.js — lowers all classificatory
+        string fields to canonical pipeline casing. Display casing applied at
+        render time only. ACTION_ARRAY_FIELDS expanded to include traits,
+        lair_actions, and regional_effects so desc normalization and name
+        lowercasing apply consistently across all action-bearing fields.
 Related Files:
   normalization-engine.js
   helpers.js
@@ -46,26 +51,55 @@ Notes:
     if the schema grows (e.g. villain_actions, lair_actions)
   - collapseSignSpaces is a reusable helper in helpers.js; opt-in per field
   - splitNewlineDesc is a reusable helper in helpers.js; opt-in per field
+  - lowercaseFields is a reusable helper in helpers.js; opt-in per domain
   - ". Hit: " split is reliable across all 533 SRD attack action descs;
     verified by query against monsters-dataset.js (2026-06-09)
   - Step 3 (\n split) runs after step 2 (". Hit: " split); if step 2 already
     converted desc to an array, step 3 is skipped (guard: typeof item.desc !== "string")
+  - lowercaseFields runs after normalizeActionDescs so desc normalisation
+    operates on the original mixed-case strings (collapseSignSpaces is
+    case-insensitive, but keeping the order explicit avoids surprises)
 --------------------------------------------------------- */
 
 import fs from "fs";
 import path from "path";
 import { normalizeRecord, normalizeBatch, NORMALIZED_DIR } from '../_core/normalization-engine.js';
-import { fixNullPages, collapseSignSpaces, splitNewlineDesc } from '../utils/helpers.js';
+import { fixNullPages, collapseSignSpaces, splitNewlineDesc, lowercaseFields } from '../utils/helpers.js';
 import { getXPFromCR, getCRFromXP, parseCRValue } from "../utils/crxp-helpers.js";
 import { logWarning } from "../utils/logging.js";
 
 // All fields that carry arrays of action objects with desc strings.
-// Add new fields here if the schema grows.
+// Add new fields here if the schema grows (e.g. villain_actions).
 const ACTION_ARRAY_FIELDS = [
   "actions",
   "reactions",
   "legendary_actions",
-  "special_abilities"
+  "special_abilities",
+  "traits",
+  "lair_actions",
+  "regional_effects"
+];
+
+// Classificatory string fields to store lowercase in pipeline data.
+// Display casing is applied at render time — never stored in data.
+// desc fields, ids, urls, dice notation, and measurement strings are
+// excluded — their capitalisation is meaningful or case-sensitive.
+const LOWERCASE_FIELD_PATHS = [
+  "name",
+  "size",
+  "armor_type",
+  "alignment",
+  "creature_type",
+  "subtype",
+  "actions[].name",
+  "reactions[].name",
+  "legendary_actions[].name",
+  "special_abilities[].name",
+  "traits[].name",
+  "lair_actions[].name",
+  "regional_effects[].name",
+  "actions[].damage[].damage_type.name",
+  "traits[].spellcasting.spells[].name"
 ];
 
 /**
@@ -133,11 +167,6 @@ function transformMonsterFields(monster) {
         normalized.data_file_provenance = normalized.sources[0].source.toLowerCase();
     }
 
-    // Canonicalize ordering-critical fields
-    if (normalized.name && typeof normalized.name === 'string') {
-        normalized.name = normalized.name.trim().toLowerCase();
-    }
-
     // ======= Normalize CR/XP =======
     
     // Normalize CR value first
@@ -192,6 +221,11 @@ function transformMonsterFields(monster) {
 
     // ======= Normalize action desc strings =======
     normalizeActionDescs(normalized);
+
+    // ======= Lowercase classificatory string fields =======
+    // Runs after normalizeActionDescs so desc normalization operates on
+    // original mixed-case strings. lowercaseFields mutates in place.
+    lowercaseFields(normalized, LOWERCASE_FIELD_PATHS);
     
     return normalized;
 }
